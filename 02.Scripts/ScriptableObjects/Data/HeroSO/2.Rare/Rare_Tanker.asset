@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b49613da888254e991c0bd3da49259, type: 3}
+  m_Name: Rare_Tanker
+  m_EditorClassIdentifier: 
+  hid: 200
+  roleType: 0
+  icon: {fileID: -9115220207720403035, guid: 6473748c8ccbd7b41b4f127cfce91272, type: 3}
+  heroName: "\uC138\uB808\uB098"
+  heroDescription: "\uAE30\uC0AC\uC600\uB358 \uC544\uBC84\uC9C0\uC5D0\uAC8C \uAC80\uC220\uACFC
+    \uC804\uD22C \uAE30\uC220\uC744 \uBC30\uC6B4 \uB6F0\uC5B4\uB09C \uC804\uC0AC\uC785\uB2C8\uB2E4."
+  RCode: TES00005
+  multipleStat:
+    StatChangeType: 1
+    Atk: 0.5
+    Health: 0.5
+    Defense: 0.5
+    AttackSpeed: 1
+    MoveSpeed: 1
+    AttackRange: 1
+    CritRate: 1
+    CritMultiplier: 1
+    SkillMultiplier: 1
+    DamageMultiplier: 1
+    HealMultiplier: 1

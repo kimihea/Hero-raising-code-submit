@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/02.Scripts/Managers/Singleton.cs.meta
+guid: fcd5170326b7a0c489d77d94392a66c4
+========
+guid: e443d1e0a66a3214d9395180542d534f
+>>>>>>>> Dev:Assets/02.Scripts/Character/StateMachine/CharacterAttack03State.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

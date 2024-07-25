@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/02.Scripts/Managers/ResourceManager.cs.meta
+guid: b88844c4919ea46419cb9ecc57761a8c
+========
+guid: ae18c8db05537c043987168b784e854d
+>>>>>>>> Dev:Assets/02.Scripts/Character/StateMachine/CharacterAttack02State.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
