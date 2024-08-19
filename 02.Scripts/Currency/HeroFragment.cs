@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class HeroFragment : MonoBehaviour
 {
-    // ¿µ¿õÀÇ ID
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ID
     public int HeroId { get; set; }
 
-    // ¿µ¿õ Á¶°¢ÀÇ ÇöÀç ¼ö·®
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public int Amount { get; private set; }
 
-    // ¼ö·®ÀÌ º¯°æµÉ ¶§ ¹ß»ýÇÏ´Â ÀÌº¥Æ®
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ß»ï¿½ï¿½Ï´ï¿½ ï¿½Ìºï¿½Æ®
     public Action OnChangedEvent;
 
-    // ¼ö·®À» º¯°æÇÏ´Â ¸Þ¼Òµå
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Þ¼Òµï¿½
     public void ChangeAmount(int amount)
     {
         Amount = amount;

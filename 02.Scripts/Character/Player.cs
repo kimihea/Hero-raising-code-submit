@@ -4,6 +4,7 @@ using UnityEditor.VersionControl;
 using Assets.PixelFantasy.PixelMonsters.Common.Scripts;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using System.Collections;
 
 
 public class Player : Character
@@ -27,18 +28,17 @@ public class Player : Character
 
         BaseStat tempStat = StatHandler.baseStat;
 
-        StatHandler.baseStat = new CharacterStat();
-        StatHandler.baseStat.StatChangeType = EStatChangeType.OVERRIDE;
+        StatHandler.ChangeCharacterStat();
+
+        /*StatHandler.baseStat = new CharacterStat();
+        StatHandler.baseStat.StatChangeType = EStatChangeType.OVERRIDE;*/
         StatHandler.baseStat.Atk = tempStat.Atk;
         StatHandler.baseStat.Health = tempStat.Health;
         StatHandler.baseStat.Defense = tempStat.Defense;
         StatHandler.baseStat.AttackSpeed = tempStat.AttackSpeed;
         StatHandler.baseStat.MoveSpeed = tempStat.MoveSpeed;
         StatHandler.baseStat.AttackRange = tempStat.AttackRange;
-
-
-
-        StatHandler.curStat = new CharacterStat();
+        /*StatHandler.curStat = new CharacterStat();*/
         StatHandler.UpdateStatModifier();
 
         //equipment = GetComponent<Equipment>();
@@ -47,9 +47,10 @@ public class Player : Character
     protected override void Start()
     {
         base.Start();
-        Health.InitHealth(StatHandler.curStat.Health);//일단 플레이어 시작할 때 curStat으로 체력 초기화,추후에 게임매니저에서 관리 예정
+        Health.InitHealth(StatHandler.curStat.GetCurHealth());//일단 플레이어 시작할 때 curStat으로 체력 초기화,추후에 게임매니저에서 관리 예정
         OnChangedStatEvent += ChangeStat;
         StatUpgradeInit();
+        
     }
 
     private void StatUpgradeInit()
@@ -59,13 +60,15 @@ public class Player : Character
         attackSpeedUpgradeLevel = 1;
         //StatHandler.AddStatModifier(upgradeStat);
         OnChangedStatEvent?.Invoke();
-
+       
     }
 
     public void ChangeStat()
     {
+
         /*StatHandler.UpdateStatModifier();
         GameManager.Instance.HeroUpdate();*/
+        
     }
 
     public override void FindTarget()
@@ -93,4 +96,6 @@ public class Player : Character
             Target = null;
         }
     }
+
+ 
 }

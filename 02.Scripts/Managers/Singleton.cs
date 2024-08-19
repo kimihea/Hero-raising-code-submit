@@ -26,23 +26,21 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
             return instance;
         }
-    }
+    }    
 
     protected virtual void Awake()
     {
         if (instance == null)
         {
-            
             DontDestroyOnLoad(this);
         }
         else
         {
-            if (instance == this)
+            if (instance != this)
             {
-                Debug.Log(gameObject.name);
+                //Debug.Log(gameObject.name);
                 Destroy(this.gameObject);
             }
-                
         }
     }
 }

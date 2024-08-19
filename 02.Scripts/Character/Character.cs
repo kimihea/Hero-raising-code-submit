@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.TextCore.Text;
 public interface IDamagable
 {
-    void TakeDamage(int value); //지원님 코드랑 합칠때 수정부분
+    void TakeDamage(int value,bool critic); 
 }
 
 [RequireComponent(typeof(StatHandler))]
@@ -14,7 +14,7 @@ public interface IDamagable
 [RequireComponent(typeof(StatHandler))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(HealthSystem))]
-public abstract class Character :MonoBehaviour , IDamagable
+public abstract class Character :MonoBehaviour , IDamagable, IHandleBuff
 {
     //public CharacterSO Data;
 
@@ -27,12 +27,14 @@ public abstract class Character :MonoBehaviour , IDamagable
     public EEntityType EntityType;
     public EEntityType TargetType;
     public Animator Animator;
-    public int CurAtk => (int)StatHandler.curStat.Atk; //지원님 코드랑 합칠때 수정부분
+    public BodyEffect BodyEffect;
+    public int CurAtk => (int)StatHandler.curStat.Atk; 
 
     public HealthSystem Health { get; private set; }    
     // 스테이지 재 시작 시 캐릭터 생성 될 위치
     public Vector3 DefalutPos;
     protected List<Character> targetList = new List<Character>();
+    private Dictionary<CharacterStat, Coroutine> activeBuffs;
 
     protected virtual void Awake()
     {        
@@ -41,14 +43,16 @@ public abstract class Character :MonoBehaviour , IDamagable
         StatHandler = GetComponent<StatHandler>();
         Controller = GetComponent<CharacterController>();
         Health = GetComponent<HealthSystem>();
-        
+        StateMachine = new CharacterStateMachine(this);
+        StateMachine.Initialize();
+        StateMachine.ChangeState(StateMachine.Idle);
+        //
     }
     protected virtual void Start()
     {
-        StateMachine = new CharacterStateMachine(this);
-        StateMachine.Initialize();
-        StateMachine.ChangeState(StateMachine.Idle);        
+        
         StatHandler.UpdateStatModifier();
+        activeBuffs = new();
     }
     protected virtual void OnEnable()
     {
@@ -66,22 +70,54 @@ public abstract class Character :MonoBehaviour , IDamagable
     public void InitStat()
     {
         StatHandler.UpdateStatModifier();
-        Health.InitHealth(StatHandler.curStat.Health);
-    }
-
-    protected float CalcDamage()
-    {
-        Debug.Log("스탯에 따른 데미지 최종 계산 메소드");
-
-        return 0;
+        Health.InitHealth(StatHandler.curStat.GetCurHealth());
     }
 
     public abstract void FindTarget();
     public abstract void SetTarget();
-    public virtual void TakeDamage(int value) //지원님 코드랑 합칠때 수정부분
+    public virtual void TakeDamage(int value, bool critic)
     {
-        Controller.CallDamage(value);
+        
+        Controller.CallOnDamage(value,critic);
     }
+    public void ActiveBuff(CharacterStat buffStat, float time, EBuffType Type)
+    {
+        switch (Type)
+        {
+            case EBuffType.ATK:
+                BodyEffect.StartEffect(BodyEffect.Data.AtkBuffParameterHash);
+                break;
+            case EBuffType.DEF:
+                BodyEffect.StartEffect(BodyEffect.Data.DefBuffParameterHash);
+                break;
+        }
+        if (activeBuffs.ContainsKey(buffStat))
+        {
+            // 이미 버프 코루틴이 적용되어 있는 경우, 1)기존 코루틴을 중지하고 새로 시작--<중지만 하면 안되고, 2)/추가로 RemoveStatModifier실행 3)딕셔너리에서 제거
+            /* 만약 캐릭터를 각성할 때 - 버프 스킬의 %도 증가하게 만들 경우 그에 대응하는 코드 필요(아닌가?)(버프 스킬의 구별을 string이나 RCode로) 
+            현재는 계속 같은 %를 지닌 스킬만 사용함.*/
+            StopCoroutine(activeBuffs[buffStat]); //1)
+            StatHandler.RemoveStatModifier(buffStat); //2)
+            activeBuffs.Remove(buffStat);//3)
+            activeBuffs[buffStat] = StartCoroutine(BuffCoroutine(buffStat, time));
+        }
+        else
+        {
+            // 새로운 버프 추가
+            Coroutine buffCoroutine = StartCoroutine(BuffCoroutine(buffStat, time));
+            activeBuffs.Add(buffStat, buffCoroutine);
 
+        }
+
+    }
+    IEnumerator BuffCoroutine(CharacterStat buffStat, float wait)
+    {
+
+        StatHandler.AddStatModifier(buffStat);
+        yield return new WaitForSeconds(wait);
+
+        StatHandler.RemoveStatModifier(buffStat);
+        activeBuffs.Remove(buffStat);
+    }
 }
 

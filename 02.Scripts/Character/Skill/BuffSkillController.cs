@@ -1,34 +1,46 @@
 using UnityEngine.TextCore.Text;
-using UnityEngine;
 using System.Collections;
-
-public class BuffSkillController : SkillObjectController
+public enum EBuffType
+{
+    SPECIAL, //"The special skill's animation will be shown by its animator."
+    ATK,
+    DEF,
+    
+}
+public interface IHandleBuff
+{
+    void ActiveBuff(CharacterStat buffStat, float time, EBuffType Type);
+}
+public abstract class BuffSkillController : SkillObjectController
 {
     public CharacterStat BuffStat;
+    public EBuffType Type;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        SetBuffStat();
+    }
     protected override void ExecuteSkill()
     {
-        StartCoroutine(Buff());
+        foreach (Character hero in GameManager.Instance.EntryList)
+        {
+            if (hero.isActiveAndEnabled)
+            {
+                IHandleBuff buff = hero.GetComponent<IHandleBuff>();
+                buff?.ActiveBuff(BuffStat, skill.Duration, Type);
+            }
+            
+        }
     }
-
+    protected override void TerminateSkill()
+    {
+        base.TerminateSkill();
+    }
     protected override void MoveSkill()
     {
         //null
     }
-    public void OnDisable()
-    {
-        //
-    }
-    IEnumerator Buff()//다음 웨이브로 넘어가면 코루틴이 중지되는 문제 발견, 일단 버프 줄 때 새 버프 주는 방식으로 변경
-    {
-        foreach (Character hero in GameManager.Instance.EntryList)
-        {
-            hero.StatHandler.RemoveStatModifier(BuffStat);
-            hero.StatHandler.AddStatModifier(BuffStat);
-        }
-        yield return new WaitForSeconds(skill.Duration);
-        foreach (Character hero in GameManager.Instance.EntryList)
-        {
-            hero.StatHandler.RemoveStatModifier(BuffStat);
-        }
-    }
+    
+    public abstract void SetBuffStat();
 }

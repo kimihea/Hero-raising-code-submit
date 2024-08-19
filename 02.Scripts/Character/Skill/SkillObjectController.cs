@@ -2,9 +2,10 @@ using System;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 public abstract class SkillObjectController : MonoBehaviour
 {
-    protected float currentDuration;
+    [SerializeField] protected float currentDuration;
     public Skill skill;
     [SerializeField] protected LayerMask WallCollisionLayer;
     [SerializeField] protected LayerMask TargetCollisionLayer;
@@ -13,9 +14,37 @@ public abstract class SkillObjectController : MonoBehaviour
         return (data.DamageMultiplier.DefaultValue +
                data.DamageMultiplier.ModifierPerGrade * stars) / 100f;
     };
+
+    /// <summary>
+    /// update문에서 실행됩니다.
+    /// </summary>
     protected abstract void MoveSkill();
-    protected abstract void ExecuteSkill(); 
+
+    /// <summary>
+    /// 오브젝트가 활성화되면 실행됩니다.
+    /// </summary>
+    protected abstract void ExecuteSkill();
+
+    /// <summary>
+    /// 스킬이 지속시간이 정상적으로 끝날때  해줄 작업
+    /// </summary>
+    protected virtual void TerminateSkill()
+    {
+        //종료되기 직전에  실행
+    }
+    /// <summary>
+    /// 스킬이 중간에 종료될 때 해줄 작업
+    /// </summary>
+    internal protected virtual void InterruptSkill()
+    {
+
+    }
     protected virtual void Awake()
+    {
+
+    }
+
+    protected virtual void Start()
     {
 
     }
@@ -29,15 +58,16 @@ public abstract class SkillObjectController : MonoBehaviour
         MoveSkill();
         UpdateDuration();
     }
-    protected float SkillDamage(Character character, Skill skill)
+    protected int SkillDamage(Character character, Skill skill)
     {
-        return character.StatHandler.curStat.Atk * getDamageMultiplier(skill.Data, skill.Stars);
+        return (int)(character.StatHandler.curStat.GetCurAtk() * getDamageMultiplier(skill.Data, skill.Stars));
     }
     private void UpdateDuration()
     {
         currentDuration += Time.deltaTime;
         if (currentDuration > skill.Duration)
         {
+            TerminateSkill();
             gameObject.SetActive(false);
         }
     }

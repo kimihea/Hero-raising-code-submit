@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "New Hero", menuName = "HeroSO")]
@@ -14,5 +14,10 @@ public class HeroSO : ScriptableObject
     public string RCode;
 
     public CharacterStat multipleStat;
+
+    public CharacterStat PassiveStat;
+
+    public CharacterStat gradeStatModifier;
+    public CharacterStat starsStatModifier;
 
 }

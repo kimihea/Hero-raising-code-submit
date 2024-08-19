@@ -1,25 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 public class Currency
 {
-    public int Amount { get; private set; }
+    public BigInteger Amount { get; private set; }
     public event Action OnChangedEvent;
 
-    public Currency(int initialAmount = 0)
+    public Currency(BigInteger initialAmount = default)
     {
         Amount = initialAmount;
     }
 
-    public void ChangeAmount(int amount)
+    public void ChangeAmount(BigInteger amount)
     {
         Amount = amount;
         OnChangedEvent?.Invoke();
     }
 
-    public bool TrySpend(int amount)
+    public bool TrySpend(BigInteger amount)
     {
         if (Amount >= amount)
         {
@@ -29,7 +30,7 @@ public class Currency
         return false;
     }
 
-    public void Add(int amount)
+    public void Add(BigInteger amount)
     {
         ChangeAmount(Amount + amount);
     }

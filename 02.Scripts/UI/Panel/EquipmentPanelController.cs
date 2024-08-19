@@ -5,11 +5,12 @@ using UnityEngine.UI;
 
 public class EquipmentPanelController : MonoBehaviour
 {
-    Image[] itemSlots;
+    public Image[] itemSlotIconArray;
 
+    public Image[] itemSlotBackgroundArray;
     private void Awake()
     {
-        itemSlots = gameObject.GetComponentsInChildren<Image>();
+        
     }
 
     // Start is called before the first frame update
@@ -17,7 +18,8 @@ public class EquipmentPanelController : MonoBehaviour
     {      
         for ( int i = 0; i < gameObject.transform.childCount; i++ )
         {            
-            StatManager.Instance.equipment.ItemSlot[i] = gameObject.transform.GetChild(i).GetComponent<Image>();
+            StatManager.Instance.equipment.ItemSlotIconArray[i] = itemSlotIconArray[i];
+            StatManager.Instance.equipment.ItemSlotBackgroundArray[i] = itemSlotBackgroundArray[i];
         }
     }
 }

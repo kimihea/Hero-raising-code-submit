@@ -7,9 +7,9 @@ public class StatHandler : MonoBehaviour
 {
     public BaseStat baseStat = new();
     public BaseStat curStat = new();
-
-    public int grade = 0;
-    public int stars = 0;
+    
+    public int grade = 1;
+    public int stars = 1;
 
     public List<BaseStat> statModifiers = new();
 
@@ -21,8 +21,17 @@ public class StatHandler : MonoBehaviour
     private readonly float minHealth;
 
     private readonly float minCritRate;
+    private readonly float minCritMultiplier;
+    private readonly float minSkillMultiplier;
+    private readonly float minDamageMultiplier;
+    private readonly float minHealMultiplier;
 
-    
+    private readonly float minAtkMultiplier;
+    private readonly float minHealthMultiplier;
+    private readonly float minDefenseMultiplier;
+    private readonly float minAttackSpeedMultiplier;
+    private readonly float minMoveSpeedMultiplier;
+
 
     private void Awake()
     {
@@ -62,10 +71,10 @@ public class StatHandler : MonoBehaviour
     {
         Func<float, float, float> operation = modifier.StatChangeType switch
         {
-            EStatChangeType.ADD => (current, change) => current + change,
+            EStatChangeType.ADD => (current, change) => current + change,            
+            EStatChangeType.GRADE => (current, change) => current + (grade * change),
+            EStatChangeType.STARS => (current, change) => current + (stars * change),
             EStatChangeType.MULTIPLE => (current, change) => current * change,
-            EStatChangeType.GRADE => (current, change) => current * change,
-            EStatChangeType.STARS => (current, change) => current * change,
             EStatChangeType.OVERRIDE => (current, change) => change,
             _ => (current, change) => change
         };
@@ -88,11 +97,35 @@ public class StatHandler : MonoBehaviour
         curStat.AttackSpeed = Mathf.Max((float)operation(curStat.AttackSpeed, modifier.AttackSpeed), minAttackSpeed);
         curStat.AttackRange = Mathf.Max((float)operation(curStat.AttackRange, modifier.AttackRange));
         //curStat.CritRate = Mathf.Max((float)operation(curStat.CritRate, modifier.CritRate), minCritRate);
+        curStat.AtkMultiplier = Mathf.Max((float)operation(curStat.AtkMultiplier, modifier.AtkMultiplier), minAtkMultiplier);
+        curStat.HealthMultiplier = Mathf.Max((float)operation(curStat.HealthMultiplier, modifier.HealthMultiplier), minHealthMultiplier);
+        curStat.DefenseMultiplier = Mathf.Max((float)operation(curStat.DefenseMultiplier, modifier.DefenseMultiplier), minDefenseMultiplier);
+        curStat.AttackSpeedMultiplier = Mathf.Max((float)operation(curStat.AttackSpeedMultiplier, modifier.AttackSpeedMultiplier), minAttackSpeedMultiplier);
+        curStat.MoveSpeedMultiplier = Mathf.Max((float)operation(curStat.MoveSpeedMultiplier, modifier.MoveSpeedMultiplier), minMoveSpeedMultiplier);
+
     }
 
-    private void UpdateCharacterStat(Func<float, float, float> operation, CharacterStat cStat , CharacterStat modifier)
+    private void UpdateCharacterStat(Func<float, float, float> operation, CharacterStat cStat, CharacterStat modifier)
     {
         cStat.CritRate = Mathf.Max((float)operation(cStat.CritRate, modifier.CritRate), minCritRate);
+        cStat.CritMultiplier = Mathf.Max((float)operation(cStat.CritMultiplier, modifier.CritMultiplier), minCritMultiplier);
+        cStat.SkillMultiplier = Mathf.Max((float)operation(cStat.SkillMultiplier, modifier.SkillMultiplier), minSkillMultiplier);
+        cStat.DamageMultiplier = Mathf.Max((float)operation(cStat.DamageMultiplier, modifier.DamageMultiplier), minDamageMultiplier);
+        cStat.HealMultiplier = Mathf.Max((float)operation(cStat.HealMultiplier, modifier.HealMultiplier), minHealMultiplier);
+
+        //cStat.AtkMultiplier = Mathf.Max((float)operation(cStat.AtkMultiplier, modifier.AtkMultiplier), minAtkMultiplier);
+        //cStat.HealthMultiplier = Mathf.Max((float)operation(cStat.HealthMultiplier, modifier.HealthMultiplier), minHealthMultiplier);
+        //cStat.DefenseMultiplier = Mathf.Max((float)operation(cStat.DefenseMultiplier, modifier.DefenseMultiplier), minDefenseMultiplier);
+        //cStat.AttackSpeedMultiplier = Mathf.Max((float)operation(cStat.AttackSpeedMultiplier, modifier.AttackSpeedMultiplier), minAttackSpeedMultiplier);
+        //cStat.MoveSpeedMultiplier = Mathf.Max((float)operation(cStat.MoveSpeedMultiplier, modifier.MoveSpeedMultiplier), minMoveSpeedMultiplier);        
+    }
+
+    public void ChangeCharacterStat()
+    {
+        baseStat = new CharacterStat(baseStat);
+        baseStat.StatChangeType = EStatChangeType.OVERRIDE;
+
+        curStat = new CharacterStat(curStat);
     }
 }
 

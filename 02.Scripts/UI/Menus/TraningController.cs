@@ -1,6 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TrainingController : MonoBehaviour
@@ -14,32 +19,40 @@ public class TrainingController : MonoBehaviour
     private Text x1Text;
     private Text x10Text;
     private Text x100Text;
-
+    public List<TextMeshProUGUI> StatText = new();
+    public List<Text>  EnhanceInofoText = new();
+    public List<Button> buttons;
+    #region 스탯
     // 공격력 증가
     public Button STREnhanceButton;
-    public Text STRCostText;
+    public TextMeshProUGUI STRCostText;
     public Text STRCurrentLevelText;
 
     // 체력 증가
     public Button HPEnhanceButton;
-    public Text HPCostText;
+    public TextMeshProUGUI HPCostText;
     public Text HPCurrentLevelText;
 
-    // 체력 재생 증가
-    public Button HPREnhanceButton;
-    public Text HPRCostText;
-    public Text HPRCurrentLevelText;
+    //공격속도증가
+    public Button ATKSpeedEnhanceButton;
+    public TextMeshProUGUI ATKSppedCostText;
+    public Text ATKSpeedCurrentLevelText;
 
     // 방어력 증가
     public Button DEFEnhanceButton;
-    public Text DEFCostText;
+    public TextMeshProUGUI DEFCostText;
     public Text DEFCurrentLevelText;
 
     // 치명타 확률 증가
     public Button CRTEnhanceButton;
-    public Text CRTCostText;
+    public TextMeshProUGUI CRTCostText;
     public Text CRTCurrentLevelText;
-
+    //치피증
+    public Button CRMEnhanceButton;
+    public TextMeshProUGUI CRMCostText;
+    public Text CRMCurrentLevelText;
+    #endregion
+    #region
     // 초기 레벨과 비용
     private int STRLevel = 1;
     private int STRCost = 100;
@@ -47,8 +60,8 @@ public class TrainingController : MonoBehaviour
     private int HPLevel = 1;
     private int HPCost = 100;
 
-    private int HPRLevel = 1;
-    private int HPRCost = 100;
+    private int ATKSpeedLevel = 1;
+    private int ATKSpeedCost = 100;
 
     private int DEFLevel = 1;
     private int DEFCost = 100;
@@ -56,9 +69,16 @@ public class TrainingController : MonoBehaviour
     private int CRTLevel = 1;
     private int CRTCost = 100;
 
+    private int CRMLevel = 1;
+    private int CRMCost = 100;
+    private bool isEnhancing = false; // 스탯 강화가 진행 중인지 여부
+    //public float enhancementInterval = 0.05f; // 강화 간격 (초 단위)
+    private WaitForSecondsRealtime upgradeInterval = new WaitForSecondsRealtime(0.1f);
+    private WaitForSecondsRealtime waitPressing = new WaitForSecondsRealtime(0.5f);
+
     // 선택된 배율을 저장할 변수
     private int selectedMultiplier = 1;
-
+    #endregion
 
     void Start()
     {
@@ -71,14 +91,24 @@ public class TrainingController : MonoBehaviour
         x1Button.onClick.AddListener(() => SelectMultiplier(1));
         x10Button.onClick.AddListener(() => SelectMultiplier(10));
         x100Button.onClick.AddListener(() => SelectMultiplier(100));
+        int TempIndex=0;
+        
+        foreach (var button in buttons)
+        {
+            button.onClick.RemoveAllListeners();
+            int currentIndex = TempIndex;
+            var buttonEventTrigger = button.gameObject.AddComponent<EventTrigger>();
 
-        /*// 강화 버튼 클릭 시 해당 함수 호출
-        STREnhanceButton.onClick.AddListener(() => OnEnhanceButtonClick("STR"));
-        HPEnhanceButton.onClick.AddListener(() => OnEnhanceButtonClick("HP"));
-        HPREnhanceButton.onClick.AddListener(() => OnEnhanceButtonClick("HPR"));
-        DEFEnhanceButton.onClick.AddListener(() => OnEnhanceButtonClick("DEF"));
-        CRTEnhanceButton.onClick.AddListener(() => OnEnhanceButtonClick("CRT"));*/
+            var pointerDownEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            pointerDownEntry.callback.AddListener((data) => { OnPointerDown((PointerEventData)data, currentIndex); });
 
+            var pointerUpEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+            pointerUpEntry.callback.AddListener((data) => { OnPointerUp((PointerEventData)data, currentIndex); });
+
+            buttonEventTrigger.triggers.Add(pointerDownEntry);
+            buttonEventTrigger.triggers.Add(pointerUpEntry);
+            TempIndex++;
+        }
         // 강화 버튼 클릭 시 해당 함수 호출
         STREnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.ATK));
         STREnhanceButton.onClick.AddListener(() => UpdateUI());
@@ -86,14 +116,17 @@ public class TrainingController : MonoBehaviour
         HPEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.HEALTH));
         HPEnhanceButton.onClick.AddListener(() => UpdateUI());
 
-        HPREnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.DEFENSE));
-        HPREnhanceButton.onClick.AddListener(() => UpdateUI());
-
-        DEFEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.ATKSPEED));
+        DEFEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.DEFENSE));
         DEFEnhanceButton.onClick.AddListener(() => UpdateUI());
+
+        ATKSpeedEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.ATKSPEED));
+        ATKSpeedEnhanceButton.onClick.AddListener(() => UpdateUI());
 
         CRTEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.CRITRATE));
         CRTEnhanceButton.onClick.AddListener(() => UpdateUI());
+
+        CRMEnhanceButton.onClick.AddListener(() => StatManager.Instance.StatLevelUp((int)EStatType.CRITMULTIPLIER));
+        CRMEnhanceButton.onClick.AddListener(() => UpdateUI());
         // 초기 배율 버튼 상태 설정
         SelectMultiplier(1);
     }
@@ -153,72 +186,144 @@ public class TrainingController : MonoBehaviour
             HPLevel += selectedMultiplier;
             HPCost += 50 * selectedMultiplier;
         }
-        else if (statType == "HPR")
+        else if (statType == "AS")
         {
-            HPRLevel += selectedMultiplier;
-            HPRCost += 50 * selectedMultiplier;
+            ATKSpeedLevel += selectedMultiplier;
+            ATKSpeedCost += 50 * selectedMultiplier;
         }
         else if (statType == "DEF")
         {
             DEFLevel += selectedMultiplier;
             DEFCost += 50 * selectedMultiplier;
         }
-        else if(statType == "CRT")
+        else if (statType == "CRT")
         {
             CRTLevel += selectedMultiplier;
             CRTCost += 50 * selectedMultiplier;
         }
-
+        else if (statType == "CRM")
+        {
+            CRMLevel += selectedMultiplier;
+            CRMCost += 50 * selectedMultiplier;
+        }
         UpdateUI();
     }
 
     // UI를 업데이트하는 메서드
     private void UpdateUI()
     {
-        STRCostText.text = StatManager.Instance.Stats[(int)EStatType.ATK].totalCost + " G";
-        STRCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.ATK].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.ATK].statLevel}";
+        if (StatManager.Instance.Stats.Count > 0)
+        {
+            EStatType[] statTypes = {
+        EStatType.ATK,
+        EStatType.HEALTH,
+        EStatType.ATKSPEED,
+        EStatType.DEFENSE,
+        EStatType.CRITRATE,
+        EStatType.CRITMULTIPLIER//그 원래 코드가 반복문 없이 땡으로 박는거여서 임시 조치했습니다. 아 그 하다가 오류 날까봐 일단 안전하게 했습니다.
+    };
 
-        HPCostText.text = StatManager.Instance.Stats[(int)EStatType.HEALTH].totalCost + " G";
-        HPCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.HEALTH].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.HEALTH].statLevel}";
+            TextMeshProUGUI[] costTexts = {
+        STRCostText,
+        HPCostText,
+        ATKSppedCostText,
+        DEFCostText,
+        CRTCostText,
+        CRMCostText
+    };
 
-        HPRCostText.text = StatManager.Instance.Stats[(int)EStatType.DEFENSE].totalCost + " G";
-        HPRCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.DEFENSE].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.DEFENSE].statLevel}";
+            Text[] levelTexts = {
+        STRCurrentLevelText,
+        HPCurrentLevelText,
+        ATKSpeedCurrentLevelText,
+        DEFCurrentLevelText,
+        CRTCurrentLevelText,
+        CRMCurrentLevelText
+    };
+            //STRCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.ATK].totalCost).ToAbbreviatedString();
+            //STRCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.ATK].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.ATK].statLevel}";
 
-        DEFCostText.text = StatManager.Instance.Stats[(int)EStatType.ATKSPEED].totalCost + " G";
-        DEFCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.ATKSPEED].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.ATKSPEED].statLevel}";
+            //HPCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.HEALTH].totalCost).ToAbbreviatedString();
+            //HPCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.HEALTH].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.HEALTH].statLevel}";
 
-        CRTCostText.text = StatManager.Instance.Stats[(int)EStatType.CRITRATE].totalCost + " G";
-        CRTCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.CRITRATE].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.CRITRATE].statLevel}";
+            //ATKSppedCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.ATKSPEED].totalCost).ToAbbreviatedString();
+            //ATKSpeedCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.ATKSPEED].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.ATKSPEED].statLevel}";
 
-        STRCostText.color = StatManager.Instance.Stats[(int)EStatType.ATK].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
-        HPCostText.color = StatManager.Instance.Stats[(int)EStatType.HEALTH].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
-        HPRCostText.color = StatManager.Instance.Stats[(int)EStatType.DEFENSE].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
-        DEFCostText.color = StatManager.Instance.Stats[(int)EStatType.ATKSPEED].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
-        CRTCostText.color = StatManager.Instance.Stats[(int)EStatType.CRITRATE].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
+            //DEFCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.DEFENSE].totalCost).ToAbbreviatedString();
+            //DEFCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.DEFENSE].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.DEFENSE].statLevel}";
+
+            //CRTCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.CRITRATE].totalCost).ToAbbreviatedString();
+            //CRTCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.CRITRATE].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.CRITRATE].statLevel}";
+            //CRMCostText.text = new BigInteger(StatManager.Instance.Stats[(int)EStatType.CRITMULTIPLIER].totalCost).ToAbbreviatedString();
+            //CRMCurrentLevelText.text = $"{StatManager.Instance.Stats[(int)EStatType.CRITMULTIPLIER].statDescription} Lv. {StatManager.Instance.Stats[(int)EStatType.CRITMULTIPLIER].statLevel:D4)}";
+            for (int i = 0; i < statTypes.Length; i++)
+            {
+                var stat = StatManager.Instance.Stats[(int)statTypes[i]];
+                costTexts[i].text = new BigInteger(stat.totalCost).ToAbbreviatedString();
+
+                int levelLength = stat.statLevel.ToString().Length;
+                int padding = 4 - levelLength; // 최대 자리 수에서 현재 자리 수를 뺀 값을 패딩으로 사용
+                levelTexts[i].text = $"{stat.statDescription}" ;
+                EnhanceInofoText[i].text =  $"Lv.{stat.statLevel.ToString().PadLeft(padding + levelLength)} --> Lv.{(stat.statLevel+ selectedMultiplier).ToString().PadLeft(padding + levelLength)}";
+                //levelTexts[i].text = $"{stat.statDescription} Lv. {stat.statLevel.ToString().PadLeft(padding + levelLength)}";
+            }
+            for (int i = 0; i < StatText.Count; i++)
+            {
+                SetClaimTextColor(StatText[i],i);
+            }
 
 
-        // 강화 비용 텍스트 업데이트
-        /*STRCostText.text = STRCost + " G";
+            // 강화 비용 텍스트 업데이트
+            /*STRCostText.countText = STRCost + " G";
 
-        // 레벨 텍스트 업데이트
-        STRCurrentLevelText.text = "공격력 증가 Lv." + STRLevel;
+            // 레벨 텍스트 업데이트
+            STRCurrentLevelText.countText = "공격력 증가 Lv." + STRLevel;
 
 
-        HPCostText.text = HPCost + " G";
-        HPCurrentLevelText.text = "체력 증가 Lv." + HPLevel;
+            HPCostText.countText = HPCost + " G";
+            HPCurrentLevelText.countText = "체력 증가 Lv." + HPLevel;
 
-        HPRCostText.text = HPRCost + " G";
-        HPRCurrentLevelText.text = "체력 재생 증가 Lv." + HPRLevel;
+            HPRCostText.countText = ATKSpeedCost + " G";
+            HPRCurrentLevelText.countText = "체력 재생 증가 Lv." + ATKSpeedLevel;
 
-        DEFCostText.text = DEFCost + " G";
-        DEFCurrentLevelText.text = "방어력 증가 Lv." + DEFLevel;
+            DEFCostText.countText = DEFCost + " G";
+            DEFCurrentLevelText.countText = "방어력 증가 Lv." + DEFLevel;
 
-        CRTCostText.text = CRTCost + " G";
-        CRTCurrentLevelText.text = "치명타 확률 증가 Lv." + CRTLevel;*/
+            CRTCostText.countText = CRTCost + " G";
+            CRTCurrentLevelText.countText = "치명타 확률 증가 Lv." + CRTLevel;*/
 
-        // 배율 버튼 상태 업데이트
-        x1Button.interactable = selectedMultiplier != 1;
-        x10Button.interactable = selectedMultiplier != 10;
-        x100Button.interactable = selectedMultiplier != 100;
+            // 배율 버튼 상태 업데이트
+            x1Button.interactable = selectedMultiplier != 1;
+            x10Button.interactable = selectedMultiplier != 10;
+            x100Button.interactable = selectedMultiplier != 100;
+        } 
+    }
+    public void SetClaimTextColor(TextMeshProUGUI target,int index)
+    {
+        target.color = StatManager.Instance.Stats[index].totalCost <= CurrencyManager.Instance.CurrencyDict[ECurrencyType.Gold].Amount ? Color.white : Color.red;
+    }
+    private IEnumerator EnhanceStrengthRoutine(int index)
+    {
+        isEnhancing = true;
+        yield return waitPressing;
+        while (isEnhancing)
+        {
+            yield return upgradeInterval; // 0.05초 대기
+            StatManager.Instance.StatLevelUp(index);
+            UpdateUI();
+        }
+    }
+    void OnPointerDown(PointerEventData eventData,int index)
+    {
+        if (!isEnhancing)
+        {
+            StartCoroutine(EnhanceStrengthRoutine(index));
+        }
+    }
+
+    void OnPointerUp(PointerEventData eventData,int index)
+    {
+        StopCoroutine(EnhanceStrengthRoutine(index));
+        isEnhancing = false;
     }
 }

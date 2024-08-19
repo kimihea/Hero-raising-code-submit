@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 public class MimicAnimationController : MonoBehaviour
@@ -12,11 +14,23 @@ public class MimicAnimationController : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void OnHitButtonPressed()
+    // 특정 트리거 이름을 설정할 수 있는 메서드
+    public void SetTrigger(int index)
     {
-        if ( StatManager.Instance.equipment.isGachaPossible)
+        if (animator != null)
         {
-            animator.SetTrigger("TriggerHit");
-        }  
+            if (!Equipment.isGachaPossible) return;
+
+            // ManaStone의 0개인지 확인
+            BigInteger manaStoneAmount = CurrencyManager.Instance.GetCurrencyAmount(ECurrencyType.ManaStone);
+            if (manaStoneAmount <= 0)
+            {
+                //Debug.Log("ManaStone이 부족하여 Trigger가 발동되지 않습니다.");
+                return;
+            }
+
+            string triggerName = $"Trigger{index}";
+            animator.SetTrigger(triggerName);
+        }
     }
 }

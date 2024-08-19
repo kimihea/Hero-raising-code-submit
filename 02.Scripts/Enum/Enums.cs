@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum EResourceType
+public enum EAddressableType
 {
     PREFAB,
     DATA,
-    AUDIO
+    AUDIO,
+    IMAGE,
+    UI
 }
 
 public enum ECurrencyType
@@ -37,12 +39,19 @@ public enum ERoleType
 
 public enum EEquipmentType
 {
-    WEAPON = 0,
+    /*WEAPON = 0,
     HEAD = 1,
     CHEST = 2,
     HANDS = 3,
     LEGS = 4,
-    FOOT = 5,
+    FOOT = 5,*/
+
+    HEAD = 0,
+    CHEST = 1,
+    WEAPON = 2,
+    LEGS = 3,
+    FOOT = 4,
+    HANDS = 5,
 }
 
 public enum ERarityType
@@ -76,7 +85,7 @@ public enum EStatType
 public enum EBattleType
 {
     STAGE,
-    DUNGEON,
+    GOLDDUNGEON,
     AWAKEN
 }
 
@@ -98,9 +107,22 @@ public enum ESkillType
 {
     PROJECTILE,
     AOE, //Area of Effect
-    BUFF
+    BUFF,
+    Heal
+}
+public enum EAlertType
+{
+    LACK,
+    NOTIMPLEMENTED,
+    SUCCESS,
+    CHAPTER,
 }
 
+public enum ESkillMotion
+{
+    MOTION1,
+    MOTION2,
+}
 
 
 

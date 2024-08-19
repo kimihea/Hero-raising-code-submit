@@ -32,7 +32,9 @@ public class HeroGacha : BaseGacha
                 break;
         }
 
-        HeroManager.Instance.HasHeroCheck(heroSO);
+        HeroData heroData = new HeroData(heroSO);
+
+        _ = HeroManager.Instance.HasHeroCheckAsync(heroData);
 
 
     }
@@ -42,6 +44,8 @@ public class HeroGacha : BaseGacha
         base.Start();
 
         GameManager.Instance.heroGacha = this;
+
+        ImageInit();
     }
 
     private HeroSO HeroSet(HeroSO[] itemPool)
@@ -67,6 +71,22 @@ public class HeroGacha : BaseGacha
         if (Input.GetKeyDown(KeyCode.W))
         {
             UpgradeProbability();
+        }
+    }
+
+    public void ImageInit()
+    {
+        HeroSilhouetteAdd(commonPool);
+        HeroSilhouetteAdd(rarePool);
+        HeroSilhouetteAdd(epicPool);
+        HeroSilhouetteAdd(legendPool);
+    }
+
+    private void HeroSilhouetteAdd(HeroSO[] heroSOArray )
+    {
+        foreach (HeroSO so in heroSOArray)
+        {
+            HeroManager.Instance.heroSilhouetteArray.Add(so.icon);
         }
     }
 

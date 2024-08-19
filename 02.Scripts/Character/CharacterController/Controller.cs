@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -30,7 +30,8 @@ public class Controller : MonoBehaviour
     }
     public void DamagedAnim()
     {
-        currentHurtCoroutine =  StartCoroutine(PlayHurtAnimationAndIdleCoroutine());
+        if(isActiveAndEnabled==true)
+            currentHurtCoroutine =  StartCoroutine(PlayHurtAnimationAndIdleCoroutine());
     }
     public void DeathAnim()
     {

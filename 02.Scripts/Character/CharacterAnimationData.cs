@@ -19,6 +19,7 @@ public class CharacterAnimationData
     [SerializeField] private string attack03ParameterName = "Attack03";
 
     [SerializeField] private string CurMotionTimeParameterName = "CurMotionTime";
+    [SerializeField] private string CurAttackMotionSpeedParameterName = "CurAttackMotionSpeed";
 
 
     public int IdleParameterHash { get; private set; }
@@ -33,6 +34,8 @@ public class CharacterAnimationData
     public int HurtParameterHash { get; private set; }
     public int CombatParameterHash { get; private set; }
     public int CurMotionTimeParameterHash { get; private set; }
+    public int CurAttackMotionSpeedParameterHash { get; private set; }
+
 
     public void Initialize()
     {
@@ -47,5 +50,6 @@ public class CharacterAnimationData
         HurtParameterHash = Animator.StringToHash(hurtParameterName);
         CombatParameterHash = Animator.StringToHash(combatParameterName);
         CurMotionTimeParameterHash = Animator.StringToHash(CurMotionTimeParameterName);
+        CurAttackMotionSpeedParameterHash = Animator.StringToHash(CurAttackMotionSpeedParameterName);
     }
 }

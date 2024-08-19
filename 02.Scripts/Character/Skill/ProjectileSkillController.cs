@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.TextCore.Text;
 public class ProjectileSkillController : SkillObjectController
 {
-    Character character;
+    public Character character;
     public Transform SpawnPoint;
+    Vector3 direction = Vector3.right;
     protected override void Awake()
     {
         base.Awake();
@@ -14,7 +15,7 @@ public class ProjectileSkillController : SkillObjectController
         transform.position = SpawnPoint.position;
         if (character.Target != null)
         {
-            Vector2 direction = character.Target.position - transform.position;
+            direction = character.Target.position - transform.position;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
         }
@@ -23,11 +24,11 @@ public class ProjectileSkillController : SkillObjectController
     {
         if(character.Target != null)
         {
-            transform.position += (character.Target.position - SpawnPoint.position).normalized * skill.Data.SkillMoveSpeed;
+            transform.position += direction.normalized * skill.Data.SkillMoveSpeed;
         }
         else
         {
-            transform.position += Vector3.right * skill.Data.SkillMoveSpeed;
+            transform.position += direction.normalized * skill.Data.SkillMoveSpeed;
         }
     }
     protected void OnTriggerEnter2D(Collider2D collision)
@@ -40,7 +41,8 @@ public class ProjectileSkillController : SkillObjectController
         {
             //SoundManager.PlayFx(SoundFx.SkillHit);
             IDamagable damagable = collision.GetComponent<IDamagable>();
-            damagable?.TakeDamage((int)(character.CurAtk* skill.DamagePerGradge()));
+            var (damage, isCritical) = character.Controller.CalculateDamage(SkillDamage(character, skill));
+            damagable?.TakeDamage(damage,isCritical);
         }
     }
 }
